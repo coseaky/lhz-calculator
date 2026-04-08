@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>联合租租金收益计算器</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --success: #16a34a;
+  --warning: #d97706;
+  --purple: #7c3aed;
+  --teal: #059669;
+  --gray-50: #f8fafc;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(180deg, #eef4ff 0%, #f8fafc 180px, #f3f4f6 100%);
+  color: var(--gray-900);
+}
+
+.hero {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+  color: #fff;
+  padding: 42px 20px 70px;
+  text-align: center;
+}
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+}
+.hero p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 1080px;
+  margin: -34px auto 40px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.section-head {
+  margin-bottom: 20px;
+}
+.section-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.section-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+@media (max-width: 700px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px 16px;
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+  .hero {
+    padding: 28px 16px 50px;
+  }
+  .hero h1 {
+    font-size: 22px;
+  }
+  .hero p {
+    font-size: 13px;
+  }
+  .container {
+    margin-top: -24px;
+    padding: 0 12px;
+  }
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .section-title {
+    font-size: 17px;
+  }
+  .section-desc {
+    font-size: 13px;
+  }
+  input, select {
+    padding: 12px 14px;
+    font-size: 16px; /* 防止iOS缩放 */
+    min-height: 44px; /* 增大点击区域 */
+  }
+  label {
+    font-size: 14px;
+  }
+  .btn-calc {
+    padding: 16px;
+    font-size: 17px;
+    min-height: 52px;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 6px;
+}
+.label-hint {
+  color: var(--gray-500);
+  font-weight: 400;
+}
+input, select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: 10px;
+  font-size: 15px;
+  background: #fff;
+  transition: 0.2s border-color, 0.2s box-shadow;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+input[readonly] {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+.small-text {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.btn-calc {
+  width: 100%;
+  margin-top: 26px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.08s ease;
+}
+.btn-calc:hover { background: var(--primary-dark); }
+.btn-calc:active { transform: scale(0.995); }
+
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 900px) {
+  .summary-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .summary-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .summary-item {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+  .summary-item .label {
+    margin-bottom: 0;
+    font-size: 14px;
+  }
+  .summary-item .value {
+    font-size: 20px;
+  }
+  .summary-item .sub {
+    display: none; /* 移动端隐藏副标题节省空间 */
+  }
+}
+.summary-item {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.summary-item.highlight {
+  background: var(--primary-light);
+  border-color: #bfdbfe;
+}
+.summary-item .label {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-bottom: 6px;
+}
+.summary-item .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.summary-item.highlight .value {
+  color: var(--primary);
+}
+.summary-item .sub {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 4px;
+}
+
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 900px) {
+  .role-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .role-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .role-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .role-card {
+    padding: 12px 8px;
+  }
+  .role-card .emoji {
+    font-size: 20px;
+  }
+  .role-card .name {
+    font-size: 12px;
+  }
+  .role-card .amount {
+    font-size: 16px;
+  }
+  .role-card .sub {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+}
+.role-card {
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+}
+.role-card .emoji { font-size: 24px; margin-bottom: 6px; }
+.role-card .name { font-size: 13px; color: var(--gray-500); }
+.role-card .amount { font-size: 20px; font-weight: 700; margin: 6px 0 4px; }
+.role-card .sub { font-size: 12px; color: var(--gray-500); line-height: 1.5; }
+.role-card.landlord { background: #eff6ff; border-color: #bfdbfe; }
+.role-card.landlord .amount { color: var(--primary); }
+.role-card.investor { background: #f5f3ff; border-color: #ddd6fe; }
+.role-card.investor .amount { color: var(--purple); }
+.role-card.referrer { background: #fff7ed; border-color: #fed7aa; }
+.role-card.referrer .amount { color: var(--warning); }
+.role-card.manager { background: #ecfdf5; border-color: #bbf7d0; }
+.role-card.manager .amount { color: var(--teal); }
+.role-card.platform { background: #f8fafc; border-color: #e2e8f0; }
+.role-card.platform .amount { color: var(--gray-700); }
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+.detail-table {
+  width: 100%;
+  min-width: 700px; /* 保证表格内容可读 */
+  border-collapse: collapse;
+  font-size: 13px;
+}
+@media (max-width: 480px) {
+  .table-wrap {
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
+  .detail-table {
+    font-size: 12px;
+  }
+  .detail-table th,
+  .detail-table td {
+    padding: 8px 6px;
+  }
+}
+.detail-table th {
+  background: var(--gray-50);
+  color: var(--gray-700);
+  font-weight: 700;
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 2px solid var(--gray-200);
+  white-space: nowrap;
+}
+.detail-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-100);
+  white-space: nowrap;
+}
+.detail-table tr:hover td {
+  background: #fafcff;
+}
+.detail-table .no-share td:first-child::after {
+  content: "不分账";
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  color: #fff;
+  background: #ef4444;
+  vertical-align: middle;
+}
+.detail-table .direct-row {
+  background: #f8fafc;
+}
+.detail-table .total-row {
+  background: #f8fafc;
+  font-weight: 700;
+}
+.detail-table .direct-row {
+  background: #f0fdf4;
+}
+.detail-table .direct-row td {
+  color: #166534;
+}
+
+/* 租金行 - 蓝色系 */
+.detail-table .rent-row {
+  background: #eff6ff;
+}
+.detail-table .rent-row td {
+  color: #1e40af;
+}
+
+/* 其他角色分账行 - 灰色系 */
+.detail-table .role-row {
+  background: #f8fafc;
+}
+.detail-table .role-row td {
+  color: #475569;
+}
+
+.detail-table .total-row {
+  background: #dbeafe;
+  font-weight: 700;
+  border-top: 2px solid #3b82f6;
+}
+.detail-table .total-row td {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--gray-50);
+  border-radius: 10px;
+  color: var(--gray-500);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.note strong { color: var(--gray-700); }
+@media (max-width: 480px) {
+  .note {
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <h1>🏠 联合租租金收益计算器</h1>
+    <p>支持押金直结房东、账单期数、付款方式、推荐人和按条分账记录展示</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">基础参数设置</h2>
+        <p class="section-desc">输入租金、押金、账单周期、付款方式即可计算分账明细</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>当前账单期数</label>
+          <select id="billPeriod"></select>
+        </div>
+
+        <div class="form-group" id="depositAmountGroup">
+          <label>押金金额 (元) <span class="label-hint">默认等于月租金</span></label>
+          <input type="number" id="depositAmount" value="11000" step="0.01" min="0">
+          <div class="small-text">押金不参与分账，直接结算给房东</div>
+        </div>
+
+        <div class="form-group" id="depositPayTypeGroup">
+          <label>押金付款方式</label>
+          <select id="depositPayType">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>月租金 (元)</label>
+          <input type="number" id="monthlyRent" value="11000" step="0.01" min="0">
+        </div>
+
+        <div class="form-group">
+          <label>租期 (月)</label>
+          <select id="leaseTerm"></select>
+        </div>
+
+        <div class="form-group">
+          <label>租金付款方式（几个月付一次）</label>
+          <select id="rentPayMonths">
+            <option value="1">1个月付一次</option>
+            <option value="2">2个月付一次</option>
+            <option value="3">3个月付一次</option>
+            <option value="4">4个月付一次</option>
+            <option value="5">5个月付一次</option>
+            <option value="6">6个月付一次</option>
+            <option value="7">7个月付一次</option>
+            <option value="8">8个月付一次</option>
+            <option value="9">9个月付一次</option>
+            <option value="10">10个月付一次</option>
+            <option value="11">11个月付一次</option>
+            <option value="12">12个月付一次</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>物业费/月 (元)</label>
+          <input type="number" id="propertyFee" value="787" step="0.01" min="0">
+        </div>
+
+        <div class="form-group">
+          <label>前期不分账周期 M (月)</label>
+          <input type="number" id="noSharePeriod" value="0" min="0" max="60">
+        </div>
+
+        <div class="form-group">
+          <label>房东分账比例 (%)</label>
+          <input type="number" id="landlordPct" value="20" min="0" max="100">
+        </div>
+
+        <div class="form-group">
+          <label>投资人分账比例 (%)</label>
+          <input type="number" id="investorPct" value="80" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>推荐人参与</label>
+          <select id="hasReferrer">
+            <option value="1">有推荐人</option>
+            <option value="0">无推荐人</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-calc" id="calcBtn">📊 开始计算</button>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">账单总览</h2>
+        <p class="section-desc">默认展示当前参数下的结果，修改任意字段会自动刷新</p>
+      </div>
+      <div class="summary-row" id="summaryRow"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">各角色分账汇总</h2>
+      </div>
+      <div class="role-cards" id="roleCards"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">按条分账记录</h2>
+        <p class="section-desc">包含租金逐月分账记录，以及押金/物业费直接结算给房东的记录</p>
+      </div>
+      <div class="table-wrap">
+        <table class="detail-table" id="detailTable"></table>
+      </div>
+      <div class="note" id="noteArea"></div>
+    </div>
+  </div>
+
+<script>
+const monthlyRentInput = document.getElementById('monthlyRent');
+const depositAmountInput = document.getElementById('depositAmount');
+const landlordPctInput = document.getElementById('landlordPct');
+const investorPctInput = document.getElementById('investorPct');
+const calcBtn = document.getElementById('calcBtn');
+
+function formatMoney(num) {
+  return '¥' + Number(num || 0).toFixed(2);
+}
+
+function populateSelects() {
+  const leaseTermSelect = document.getElementById('leaseTerm');
+  const billPeriodSelect = document.getElementById('billPeriod');
+
+  let leaseOptions = '';
+  for (let i = 1; i <= 36; i++) {
+    leaseOptions += `<option value="${i}" ${i === 12 ? 'selected' : ''}>${i}个月</option>`;
+  }
+  leaseTermSelect.innerHTML = leaseOptions;
+
+  let billOptions = '';
+  for (let i = 1; i <= 36; i++) {
+    billOptions += `<option value="${i}">第${i}期</option>`;
+  }
+  billPeriodSelect.innerHTML = billOptions;
+}
+
+function updateReferrerByBillPeriod() {
+  const billPeriod = parseInt(document.getElementById('billPeriod').value) || 1;
+  const hasReferrerSelect = document.getElementById('hasReferrer');
+
+  // 业务规则：推荐人只参与第一期租金分账
+  if (billPeriod !== 1) {
+    hasReferrerSelect.value = '0';
+    hasReferrerSelect.disabled = true;
+  } else {
+    hasReferrerSelect.disabled = false;
+  }
+}
+
+function toggleDepositFields() {
+  const billPeriod = parseInt(document.getElementById('billPeriod').value) || 1;
+  const depositAmountGroup = document.getElementById('depositAmountGroup');
+  const depositPayTypeGroup = document.getElementById('depositPayTypeGroup');
+
+  // 只有首期账单显示押金相关字段
+  if (billPeriod === 1) {
+    depositAmountGroup.style.display = 'flex';
+    depositPayTypeGroup.style.display = 'flex';
+  } else {
+    depositAmountGroup.style.display = 'none';
+    depositPayTypeGroup.style.display = 'none';
+  }
+}
+
+function syncInvestorPct() {
+  const landlordPct = Math.max(0, Math.min(100, parseFloat(landlordPctInput.value) || 0));
+  landlordPctInput.value = landlordPct;
+  investorPctInput.value = (100 - landlordPct).toFixed(2).replace(/\.00$/, '');
+}
+
+function maybeSyncDepositWithRent() {
+  if (!depositAmountInput.dataset.manual) {
+    depositAmountInput.value = monthlyRentInput.value || '0';
+  }
+}
+
+function getValues() {
+  const rent = parseFloat(monthlyRentInput.value) || 0;
+  const leaseTerm = parseInt(document.getElementById('leaseTerm').value) || 12;
+  const depositAmount = parseFloat(depositAmountInput.value) || 0;
+  const depositPayType = parseInt(document.getElementById('depositPayType').value) || 1;
+  const rentPayMonths = parseInt(document.getElementById('rentPayMonths').value) || 1;
+  const billPeriod = parseInt(document.getElementById('billPeriod').value) || 1;
+  const propertyFeeMonth = parseFloat(document.getElementById('propertyFee').value) || 0;
+  const noSharePeriod = parseInt(document.getElementById('noSharePeriod').value) || 0;
+  const landlordPct = (parseFloat(landlordPctInput.value) || 0) / 100;
+  const investorPct = (parseFloat(investorPctInput.value) || 0) / 100;
+  const hasReferrer = document.getElementById('hasReferrer').value === '1';
+
+  return {
+    rent,
+    leaseTerm,
+    depositAmount,
+    depositPayType,
+    rentPayMonths,
+    billPeriod,
+    propertyFeeMonth,
+    noSharePeriod,
+    landlordPct,
+    investorPct,
+    hasReferrer
+  };
+}
+
+function calculate() {
+  syncInvestorPct();
+  const v = getValues();
+  const isFirstBill = v.billPeriod === 1;
+
+  let refCommissionRate = 0;
+  let refFeeRate = 0;
+  if (v.hasReferrer && isFirstBill) {
+    const rawRate = (0.5 / 12) * v.leaseTerm * 0.99;
+    refCommissionRate = Math.min(rawRate, 0.5);
+    refFeeRate = refCommissionRate / 0.99 * 0.01;
+  }
+
+  const depositTotal = isFirstBill ? v.depositAmount * v.depositPayType : 0;
+  const propertyFeeTotal = v.propertyFeeMonth * v.rentPayMonths;
+  const rentTotal = v.rent * v.rentPayMonths;
+  const billTotal = rentTotal + depositTotal + propertyFeeTotal;
+
+  const monthRows = [];
+  let totals = {
+    ref: 0,
+    refFee: 0,
+    mgr: 0,
+    mgrFee: 0,
+    platform: 0,
+    landlord: 0,
+    investor: 0
+  };
+
+  let noShareCounter = v.noSharePeriod;
+  const startContractMonth = ((v.billPeriod - 1) * v.rentPayMonths) + 1;
+
+  for (let i = 1; i <= v.rentPayMonths; i++) {
+    const contractMonth = startContractMonth + (i - 1);
+    const refCommission = (v.hasReferrer && isFirstBill && i === 1) ? v.rent * refCommissionRate : 0;
+    const refFee = (v.hasReferrer && isFirstBill && i === 1) ? v.rent * refFeeRate : 0;
+    const mgrService = v.rent * 0.0198;
+    const mgrFee = v.rent * 0.0002;
+    const platform = v.rent * 0.03;
+    const pool = v.rent - refCommission - refFee - mgrService - mgrFee - platform;
+
+    const isNoShare = noShareCounter > 0;
+    const landlordShare = isNoShare ? 0 : pool * v.landlordPct;
+    const investorShare = isNoShare ? pool : pool * v.investorPct;
+
+    if (isNoShare) noShareCounter--;
+
+    totals.ref += refCommission;
+    totals.refFee += refFee;
+    totals.mgr += mgrService;
+    totals.mgrFee += mgrFee;
+    totals.platform += platform;
+    totals.landlord += landlordShare;
+    totals.investor += investorShare;
+
+    monthRows.push({
+      contractMonth,
+      rent: v.rent,
+      refCommission,
+      refFee,
+      mgrService,
+      mgrFee,
+      platform,
+      landlordShare,
+      investorShare,
+      isNoShare
+    });
+  }
+
+  // settlementRows no longer used — table is built inline with fixed order below
+
+  const depositSummaryHtml = isFirstBill ? `
+    <div class="summary-item">
+      <div class="label">押金合计</div>
+      <div class="value">${formatMoney(depositTotal)}</div>
+      <div class="sub">押金付款方式：${v.depositPayType}</div>
+    </div>
+  ` : '';
+
+  document.getElementById('summaryRow').innerHTML = `
+    <div class="summary-item highlight">
+      <div class="label">账单总额</div>
+      <div class="value">${formatMoney(billTotal)}</div>
+      <div class="sub">${isFirstBill ? '租金 + 押金 + 物业费' : '租金 + 物业费（押金已在首期结算）'}</div>
+    </div>
+    <div class="summary-item">
+      <div class="label">租金合计</div>
+      <div class="value">${formatMoney(rentTotal)}</div>
+      <div class="sub">${v.rentPayMonths}个月</div>
+    </div>
+    ${depositSummaryHtml}
+    <div class="summary-item">
+      <div class="label">物业费合计</div>
+      <div class="value">${formatMoney(propertyFeeTotal)}</div>
+      <div class="sub">${v.rentPayMonths}个月</div>
+    </div>
+  `;
+
+  const landlordDirectTotal = isFirstBill ? depositTotal + propertyFeeTotal : propertyFeeTotal;
+  const landlordFinal = totals.landlord + landlordDirectTotal;
+  const landlordSubText = isFirstBill
+    ? `分账 ${formatMoney(totals.landlord)}<br>直结 ${formatMoney(landlordDirectTotal)}（含押金+物业费）`
+    : `分账 ${formatMoney(totals.landlord)}<br>直结 ${formatMoney(landlordDirectTotal)}（仅物业费）`;
+
+  document.getElementById('roleCards').innerHTML = `
+    <div class="role-card landlord">
+      <div class="emoji">🏠</div>
+      <div class="name">房东</div>
+      <div class="amount">${formatMoney(landlordFinal)}</div>
+      <div class="sub">${landlordSubText}</div>
+    </div>
+    <div class="role-card investor">
+      <div class="emoji">💼</div>
+      <div class="name">投资人</div>
+      <div class="amount">${formatMoney(totals.investor)}</div>
+      <div class="sub">比例 ${investorPctInput.value}%</div>
+    </div>
+    <div class="role-card referrer">
+      <div class="emoji">🤝</div>
+      <div class="name">推荐人</div>
+      <div class="amount">${formatMoney(totals.ref)}</div>
+      <div class="sub">${v.hasReferrer ? '实际到账<br>已扣1%手续费 ' + formatMoney(totals.refFee) : '未参与'}</div>
+    </div>
+    <div class="role-card manager">
+      <div class="emoji">🧾</div>
+      <div class="name">管家</div>
+      <div class="amount">${formatMoney(totals.mgr)}</div>
+      <div class="sub">实际到账<br>已扣1%手续费 ${formatMoney(totals.mgrFee)}</div>
+    </div>
+    <div class="role-card platform">
+      <div class="emoji">🖥️</div>
+      <div class="name">平台</div>
+      <div class="amount">${formatMoney(totals.platform + totals.refFee + totals.mgrFee)}</div>
+      <div class="sub">服务费 ${formatMoney(totals.platform)}<br>手续费 ${formatMoney(totals.refFee + totals.mgrFee)}</div>
+    </div>
+  `;
+
+  // === Build table with fixed row order ===
+  // Helper to render a row
+  function makeRow(cls, type, name, amount, ref, mgr, plat, landlord, investor, method) {
+    return `<tr class="${cls}">
+      <td>${type}</td><td>${name}</td><td>${formatMoney(amount)}</td>
+      <td>${ref}</td><td>${mgr}</td><td>${plat}</td>
+      <td>${landlord}</td><td>${investor}</td><td>${method}</td></tr>`;
+  }
+
+  let tableHtml = `
+    <thead>
+      <tr>
+        <th>记录类型</th><th>说明</th><th>金额</th>
+        <th>推荐人</th><th>管家</th><th>平台</th>
+        <th>房东</th><th>投资人</th><th>结算方式</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+  // === 第一部分：房东直接收到的钱（押金 + 物业费）===
+  // Row 1: 押金（直接结算）- 只有首期显示
+  if (isFirstBill) {
+    tableHtml += makeRow('direct-row', '押金', `押金 × ${v.depositPayType}`, depositTotal,
+      '-', '-', '-', formatMoney(depositTotal), '-', '直接结算给房东');
+  }
+
+  // Row 2: 物业费
+  tableHtml += makeRow('direct-row', '物业费', `${v.rentPayMonths}个月物业费`, propertyFeeTotal,
+    '-', '-', '-', formatMoney(propertyFeeTotal), '-', '直接结算给房东');
+
+  // === 第二部分：租金分账明细 ===
+  // Row 3+: 租金（逐月展示）
+  monthRows.forEach((row) => {
+    tableHtml += `<tr class="rent-row ${row.isNoShare ? 'no-share' : ''}">
+      <td>租金</td>
+      <td>第${v.billPeriod}期 · 合同期第${row.contractMonth}月</td>
+      <td>${formatMoney(row.rent)}</td>
+      <td>${formatMoney(row.refCommission)}</td>
+      <td>${formatMoney(row.mgrService)}</td>
+      <td>${formatMoney(row.platform)}</td>
+      <td>${formatMoney(row.landlordShare)}</td>
+      <td>${formatMoney(row.investorShare)}</td>
+      <td>${row.isNoShare ? '投资人独享' : '按比例分账'}</td>
+    </tr>`;
+  });
+
+  // === 第三部分：其他角色分账汇总 ===
+  // Row: 房东分账汇总
+  tableHtml += makeRow('role-row', '房东分账', '租金分账所得', totals.landlord,
+    '-', '-', '-', formatMoney(totals.landlord), '-', '参与分账');
+
+  // Row: 投资人分账汇总
+  tableHtml += makeRow('role-row', '投资人分账', '租金分账所得', totals.investor,
+    '-', '-', '-', '-', formatMoney(totals.investor), '参与分账');
+
+  // Row: 推荐人佣金
+  if (totals.ref > 0) {
+    tableHtml += makeRow('role-row', '推荐人分账', '首期推荐佣金（实际到账）', totals.ref,
+      formatMoney(totals.ref), '-', '-', '-', '-', '参与分账');
+  }
+
+  // Row: 推荐人手续费
+  if (totals.refFee > 0) {
+    tableHtml += makeRow('role-row', '推荐人手续费', '推荐人佣金的1%结算手续费', totals.refFee,
+      '-', '-', formatMoney(totals.refFee), '-', '-', '按规则扣除');
+  }
+
+  // Row: 管家服务费
+  tableHtml += makeRow('role-row', '管家分账', '管家服务费（实际到账）', totals.mgr,
+    '-', formatMoney(totals.mgr), '-', '-', '-', '参与分账');
+
+  // Row: 管家手续费
+  tableHtml += makeRow('role-row', '管家手续费', '管家服务费的1%结算手续费', totals.mgrFee,
+    '-', '-', formatMoney(totals.mgrFee), '-', '-', '按规则扣除');
+
+  // Row: 平台服务费
+  tableHtml += makeRow('role-row', '平台分账', '平台技术服务费', totals.platform,
+    '-', '-', formatMoney(totals.platform), '-', '-', '参与分账');
+
+  // === 第四部分：合计行（突出房东总收款）===
+  const grandTotal = depositTotal + propertyFeeTotal + rentTotal;
+
+  tableHtml += `<tr class="total-row">
+    <td>合计</td><td>本期账单总金额</td>
+    <td>${formatMoney(grandTotal)}</td>
+    <td>${formatMoney(totals.ref)}</td>
+    <td>${formatMoney(totals.mgr)}</td>
+    <td>${formatMoney(totals.platform + totals.refFee + totals.mgrFee)}</td>
+    <td>${formatMoney(landlordFinal)}</td>
+    <td>${formatMoney(totals.investor)}</td>
+    <td>账单结算</td>
+  </tr>`;
+
+  tableHtml += '</tbody>';
+
+  document.getElementById('detailTable').innerHTML = tableHtml;
+
+  const depositNote = isFirstBill
+    ? `押金 <strong>${formatMoney(depositTotal)}</strong> + 物业费 <strong>${formatMoney(propertyFeeTotal)}</strong> + 租金分账 <strong>${formatMoney(totals.landlord)}</strong> = <strong>${formatMoney(landlordFinal)}</strong>`
+    : `物业费 <strong>${formatMoney(propertyFeeTotal)}</strong> + 租金分账 <strong>${formatMoney(totals.landlord)}</strong> = <strong>${formatMoney(landlordFinal)}</strong>（押金已在首期结算）`;
+
+  document.getElementById('noteArea').innerHTML = `
+    <strong>房东收款明细：</strong>${depositNote}<br>
+    <strong>说明：</strong>
+    1）${isFirstBill ? '押金和物业费<strong>直接结算给房东</strong>，不参与分账' : '物业费<strong>直接结算给房东</strong>，押金已在首期结算完毕'}；
+    2）当前账单为 <strong>第${v.billPeriod}期</strong>，租金付款方式为 <strong>${v.rentPayMonths}个月付一次</strong>；
+    3）房东/投资人分账比例为 <strong>${landlordPctInput.value}% / ${investorPctInput.value}%</strong>。
+  `;
+}
+
+populateSelects();
+syncInvestorPct();
+updateReferrerByBillPeriod();
+toggleDepositFields();
+calculate();
+
+monthlyRentInput.addEventListener('input', () => {
+  maybeSyncDepositWithRent();
+  calculate();
+});
+depositAmountInput.addEventListener('input', () => {
+  depositAmountInput.dataset.manual = '1';
+  calculate();
+});
+landlordPctInput.addEventListener('input', () => {
+  syncInvestorPct();
+  calculate();
+});
+calcBtn.addEventListener('click', calculate);
+
+// 账单期数变化时，自动更新推荐人参与状态和押金字段显示，然后重新计算
+document.getElementById('billPeriod').addEventListener('change', () => {
+  updateReferrerByBillPeriod();
+  toggleDepositFields();
+  calculate();
+});
+
+// 其他表单元素变化时重新计算
+document.querySelectorAll('select, input').forEach(el => {
+  if (el.id !== 'monthlyRent' && el.id !== 'depositAmount' && el.id !== 'landlordPct' && el.id !== 'billPeriod') {
+    el.addEventListener('input', calculate);
+    el.addEventListener('change', calculate);
+  }
+});
+</script>
+</body>
+</html>
