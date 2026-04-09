@@ -415,6 +415,29 @@ input[readonly] {
     line-height: 1.6;
   }
 }
+
+.btn-rules {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+.btn-rules:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+@media (max-width: 480px) {
+  .btn-rules {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}
 </style>
 </head>
 <body>
@@ -536,6 +559,9 @@ input[readonly] {
         <table class="detail-table" id="detailTable"></table>
       </div>
       <div class="note" id="noteArea"></div>
+      <div style="margin-top: 16px; text-align: center;">
+        <a href="rules.html" class="btn-rules">📋 查看联合租分账规则</a>
+      </div>
     </div>
   </div>
 

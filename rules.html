@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>联合租分账规则</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --success: #16a34a;
+  --warning: #d97706;
+  --purple: #7c3aed;
+  --teal: #059669;
+  --gray-50: #f8fafc;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(180deg, #eef4ff 0%, #f8fafc 180px, #f3f4f6 100%);
+  color: var(--gray-900);
+}
+
+.hero {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+  color: #fff;
+  padding: 42px 20px 70px;
+  text-align: center;
+}
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+}
+.hero p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 1100px;
+  margin: -34px auto 40px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.section-head {
+  margin-bottom: 20px;
+}
+.section-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.section-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+/* 定义区域 */
+.def-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.def-card {
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--gray-200);
+}
+.def-card .label {
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.def-card .desc {
+  color: var(--gray-700);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 表格 */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -8px;
+  padding: 0 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+thead th:first-child { border-radius: 8px 0 0 0; }
+thead th:last-child { border-radius: 0 8px 0 0; }
+thead tr:first-child th {
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+thead tr:nth-child(2) th {
+  font-size: 12px;
+  padding: 8px 6px;
+}
+
+tbody td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+}
+tbody tr:hover { background: var(--primary-light); }
+tbody tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+tbody tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+
+/* 高亮行 */
+.highlight-row {
+  background: #fff3e0 !important;
+}
+.highlight-row td {
+  font-weight: 600;
+}
+
+/* 标签 */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.tag-equal { background: #e8f5e9; color: #2e7d32; }
+.tag-less { background: #e3f2fd; color: #1565c0; }
+.tag-greater { background: #fff3e0; color: #e65100; }
+
+/* 月份详情 */
+.month-detail { text-align: left; line-height: 1.8; }
+.month-detail .month-row { display: flex; align-items: center; gap: 6px; }
+.month-num { font-weight: 700; min-width: 70px; color: var(--gray-900); }
+.no-split { background: #ffebee; color: #c62828; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+.split { background: #e8f5e9; color: #2e7d32; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+
+.note { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
+/* 公式区域 */
+.formula {
+  background: var(--gray-50);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+.formula code {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 图例 */
+.legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+.legend-dot.red { background: #ffebee; border: 1px solid #ef9a9a; }
+.legend-dot.green { background: #e8f5e9; border: 1px solid #a5d6a7; }
+
+/* 分账比例设置 */
+.ratio-setting {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #bae6fd;
+}
+.ratio-input-group {
+  margin-bottom: 16px;
+}
+.ratio-input-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ratio-slider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #cbd5e1;
+  border-radius: 3px;
+  outline: none;
+}
+.ratio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+.ratio-number {
+  width: 60px;
+  padding: 8px 10px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--primary);
+}
+.ratio-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+.ratio-item {
+  text-align: center;
+}
+.ratio-label {
+  display: block;
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-bottom: 4px;
+}
+.ratio-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.ratio-divider {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-400);
+}
+
+/* 返回按钮 */
+.btn-back {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+  .hero {
+    padding: 28px 16px 50px;
+  }
+  .hero h1 {
+    font-size: 22px;
+  }
+  .hero p {
+    font-size: 13px;
+  }
+  .container {
+    margin-top: -24px;
+    padding: 0 12px;
+  }
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .section-title {
+    font-size: 17px;
+  }
+  .section-desc {
+    font-size: 13px;
+  }
+  table {
+    font-size: 11px;
+  }
+  thead th, tbody td {
+    padding: 8px 6px;
+  }
+  .formula {
+    padding: 12px;
+    font-size: 12px;
+  }
+  .btn-back {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <h1>📋 联合租分账规则</h1>
+    <p>包含分账比例速查表和前期不分账周期账单拆分规则</p>
+  </div>
+
+  <div class="container">
+    <!-- 分账比例设置 -->
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">一、分账比例设置</h2>
+        <p class="section-desc">设置房东与投资人的分账比例，表格将自动计算各角色分账金额</p>
+      </div>
+      <div class="ratio-setting">
+        <div class="ratio-input-group">
+          <label>房东分账比例</label>
+          <div class="input-wrapper">
+            <input type="range" id="landlordRatio" min="0" max="100" value="50" class="ratio-slider">
+            <input type="number" id="landlordInput" min="0" max="100" value="50" class="ratio-number">%
+          </div>
+        </div>
+        <div class="ratio-display">
+          <div class="ratio-item">
+            <span class="ratio-label">房东</span>
+            <span class="ratio-value" id="landlordDisplay">50%</span>
+          </div>
+          <div class="ratio-divider">:</div>
+          <div class="ratio-item">
+            <span class="ratio-label">投资人</span>
+            <span class="ratio-value" id="investorDisplay">50%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分账比例速查表 -->
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">二、分账比例速查表（按租期）</h2>
+        <p class="section-desc">各角色分账比例一览，推荐人仅首期租金参与分账</p>
+      </div>
+      <div class="table-wrap">
+        <table id="ratioTable">
+          <thead>
+            <tr>
+              <th rowspan="2">租期</th>
+              <th rowspan="2">账期</th>
+              <th colspan="5">推荐人（只参与首期租金计算）</th>
+              <th colspan="3">M-管家</th>
+              <th rowspan="2">技术服务费</th>
+              <th colspan="3">房东</th>
+              <th colspan="3">投资人</th>
+              <th rowspan="2">合计</th>
+            </tr>
+            <tr>
+              <th>公式</th>
+              <th>计算结果</th>
+              <th>佣金分账比例</th>
+              <th>手续费分账比例</th>
+              <th>小计-J</th>
+              <th>服务费分账比例</th>
+              <th>手续费分账比例</th>
+              <th>小计-M</th>
+              <th>分账比例-P</th>
+              <th>公式</th>
+              <th>结果</th>
+              <th>分账比例</th>
+              <th>公式</th>
+              <th>结果</th>
+            </tr>
+          </thead>
+          <tbody id="ratioTableBody">
+            <!-- 动态生成 -->
+          </tbody>
+        </table>
+      </div>
+      <div class="formula" style="margin-top: 16px;">
+        <strong>计算公式：</strong><br>
+        • <strong>推荐人佣金</strong> = 50% ÷ 12 × 租期月数（13个月及以上固定50%）<br>
+        • <strong>推荐人手续费</strong> = 1%（固定，由推荐人承担，平台扣取）<br>
+        • <strong>管家服务费</strong> = 1.98% &nbsp;|&nbsp; <strong>管家手续费</strong> = 0.02% &nbsp;|&nbsp; <strong>小计</strong> = 2.00%<br>
+        • <strong>平台技术服务费</strong> = 3%（固定）<br>
+        • <strong>剩余金额</strong> = 100% - 推荐人小计(J) - 管家小计(M) - 平台技术费(P)<br>
+        • <strong>房东分账</strong> = 剩余金额 × 房东分账比例<br>
+        • <strong>投资人分账</strong> = 剩余金额 × 投资人分账比例
+      </div>
+    </div>
+
+    <!-- 核心定义 -->
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">二、核心定义</h2>
+      </div>
+      <div class="def-grid">
+        <div class="def-card">
+          <div class="label">M = 前期不分账周期（月）</div>
+          <div class="desc">房东和投资人在签约时约定的前期不分账月数。在此期间，房东分账比例为 <strong>0%</strong>，租金扣除平台各方费用后的剩余部分 <strong>100% 归投资人</strong>。按月逐月覆盖，可跨账单延续。</div>
+        </div>
+        <div class="def-card">
+          <div class="label">N = 每次付租金的月数</div>
+          <div class="desc">租客付款方式"押X付N"中的N值，即每张账单包含的租金月数。例如押一付三，N=3，每张租金账单含3个月租金。</div>
+        </div>
+        <div class="def-card">
+          <div class="label">剩余不分账计数器</div>
+          <div class="desc">初始值 = M。每处理一个月扣减1，直到归零。归零后该月起按约定比例正常分账。跨账单时自动延续。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分账公式 -->
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">三、分账公式详解</h2>
+      </div>
+      <div class="formula">
+        <strong>不分账期间（剩余计数器 &gt; 0）：</strong><br>
+        房东分账 = <code>0%</code> &nbsp;|&nbsp; 投资人分账 = <code>(月租金 - 推荐人 - 管家 - 平台) × 100%</code><br><br>
+        <strong>正常分账期间（剩余计数器 = 0）：</strong><br>
+        房东分账 = <code>(月租金 - 推荐人 - 管家 - 平台) × 房东约定比例%</code><br>
+        投资人分账 = <code>(月租金 - 推荐人 - 管家 - 平台) × 投资人约定比例%</code><br><br>
+        <strong>推荐人（仅首期参与）：</strong>佣金 = <code>50% ÷ 12 × 租期</code>（13个月及以上固定50%），手续费 = <code>1%</code>（固定）<br>
+        <strong>管家：</strong>服务费 <code>1.98%</code> + 手续费 <code>0.02%</code> = <code>2.00%</code><br>
+        <strong>平台：</strong>技术服务费固定 <code>3%</code>
+      </div>
+    </div>
+
+    <!-- 图例 -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot red"></div><span style="color:#c62828;font-weight:600;">不分账（房东0%）</span></div>
+      <div class="legend-item"><div class="legend-dot green"></div><span style="color:#2e7d32;font-weight:600;">正常分账（按约定比例）</span></div>
+    </div>
+
+    <!-- 场景表 -->
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">四、账单拆分场景表（以 N=3 押一付三 为例）</h2>
+        <p class="section-desc">不同前期不分账周期(M)下的账单拆分方式</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th>M 与 N 关系</th>
+              <th>M</th>
+              <th>N</th>
+              <th>第1期账单（月1~N）</th>
+              <th>第2期账单（月N+1~2N）</th>
+              <th>第3期及以后</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- M = 0 -->
+            <tr>
+              <td><strong>场景1</strong></td>
+              <td><span class="tag tag-less">M &lt; N</span><br><span class="note">M=0 无不分账期</span></td>
+              <td>0</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~3月</span><span class="split">正常分账</span></div>
+                  <div class="note">房东/投资人按约定比例</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~6月</span><span class="split">正常分账</span></div>
+                </div>
+              </td>
+              <td>全部正常分账</td>
+            </tr>
+            <!-- M = 1 -->
+            <tr>
+              <td><strong>场景2</strong></td>
+              <td><span class="tag tag-less">M &lt; N</span></td>
+              <td>1</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1月</span><span class="no-split">不分账</span></div>
+                  <div class="month-row"><span class="month-num">第2~3月</span><span class="split">正常分账</span></div>
+                  <div class="note">计数器：1→0，第2月起恢复</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~6月</span><span class="split">正常分账</span></div>
+                </div>
+              </td>
+              <td>全部正常分账</td>
+            </tr>
+            <!-- M = 2 -->
+            <tr>
+              <td><strong>场景3</strong></td>
+              <td><span class="tag tag-less">M &lt; N</span></td>
+              <td>2</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~2月</span><span class="no-split">不分账</span></div>
+                  <div class="month-row"><span class="month-num">第3月</span><span class="split">正常分账</span></div>
+                  <div class="note">计数器：2→1→0，第3月起恢复</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~6月</span><span class="split">正常分账</span></div>
+                </div>
+              </td>
+              <td>全部正常分账</td>
+            </tr>
+            <!-- M = 3 = N -->
+            <tr>
+              <td><strong>场景4</strong></td>
+              <td><span class="tag tag-equal">M = N</span><br><span class="note">不分账期刚好覆盖首期</span></td>
+              <td>3</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~3月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：3→2→1→0，首期全不分账</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~6月</span><span class="split">正常分账</span></div>
+                </div>
+              </td>
+              <td>全部正常分账</td>
+            </tr>
+            <!-- M = 4 -->
+            <tr>
+              <td><strong>场景5</strong></td>
+              <td><span class="tag tag-greater">M &gt; N</span><br><span class="note">不分账期跨越到第2期</span></td>
+              <td>4</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~3月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：4→3→2→1</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4月</span><span class="no-split">不分账</span></div>
+                  <div class="month-row"><span class="month-num">第5~6月</span><span class="split">正常分账</span></div>
+                  <div class="note">计数器：1→0，第5月起恢复</div>
+                </div>
+              </td>
+              <td>全部正常分账</td>
+            </tr>
+            <!-- M = 5 -->
+            <tr>
+              <td><strong>场景6</strong></td>
+              <td><span class="tag tag-greater">M &gt; N</span><br><span class="note">不分账期跨越到第2期</span></td>
+              <td>5</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~3月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：5→4→3→2</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~5月</span><span class="no-split">不分账</span></div>
+                  <div class="month-row"><span class="month-num">第6月</span><span class="split">正常分账</span></div>
+                  <div class="note">计数器：2→1→0，第6月起恢复</div>
+                </div>
+              </td>
+              <td>全部正常分账</td>
+            </tr>
+            <!-- M = 6 = 2N -->
+            <tr>
+              <td><strong>场景7</strong></td>
+              <td><span class="tag tag-greater">M &gt; N</span><br><span class="note">不分账期刚好覆盖前2期</span></td>
+              <td>6</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~3月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：6→5→4→3</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~6月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：3→2→1→0</div>
+                </div>
+              </td>
+              <td>从第3期起正常分账</td>
+            </tr>
+            <!-- M = 7 -->
+            <tr>
+              <td><strong>场景8</strong></td>
+              <td><span class="tag tag-greater">M &gt; N</span><br><span class="note">不分账期跨越到第3期</span></td>
+              <td>7</td>
+              <td>3</td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第1~3月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：7→6→5→4</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第4~6月</span><span class="no-split">不分账</span></div>
+                  <div class="note">计数器：4→3→2→1</div>
+                </div>
+              </td>
+              <td>
+                <div class="month-detail">
+                  <div class="month-row"><span class="month-num">第7月</span><span class="no-split">不分账</span></div>
+                  <div class="month-row"><span class="month-num">第8~9月</span><span class="split">正常分账</span></div>
+                  <div class="note">计数器：1→0</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 通用推理规则 -->
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section-title">五、通用推理算法</h2>
+      </div>
+      <div class="formula">
+        <strong>输入：</strong>M（前期不分账月数）、N（每期付N个月租金）、总租期T<br><br>
+        <strong>算法：</strong><br>
+        1. 初始化剩余计数器 <code>remain = M</code><br>
+        2. 计算总账单期数 <code>periods = ⌈T / N⌉</code>（向上取整，最后一期可能不满N个月）<br>
+        3. 对每期账单 <code>i = 1, 2, ..., periods</code>：<br>
+        &nbsp;&nbsp;a. 本期包含月数 <code>months = min(N, T - (i-1)×N)</code>（最后一期取剩余月数）<br>
+        &nbsp;&nbsp;b. 对本月 <code>j = 1, 2, ..., months</code>：<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- 若 <code>remain &gt; 0</code>：本月不分账，<code>remain--</code><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- 若 <code>remain = 0</code>：本月正常分账<br>
+        &nbsp;&nbsp;c. 按上述结果生成本期账单的各月分账明细<br><br>
+        <strong>边界情况：</strong><br>
+        - <code>M = 0</code>：从第1个月起正常分账<br>
+        - <code>M ≥ T</code>：整个租期内房东均不分账<br>
+        - 最后一期账单月数可能不足N（如租期10个月，N=3，第4期只有1个月）
+      </div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="index.html" class="btn-back">← 返回租金收益计算器</a>
+    </div>
+  </div>
+
+<script>
+// 分账比例数据
+// 佣金分账比例：基于计算结果手动微调后的业务值（从成本角度考虑），数据来源：租金分账计算器.xlsx
+const rentData = [
+  { months: 1,  formula: '50%/12×1',  calcResult: 4.125, commission: 4.12, fee: 0.0416, subtotalJ: 4.1616, period: '租金1期' },
+  { months: 2,  formula: '50%/12×2',  calcResult: 8.25,  commission: 8.25, fee: 0.0833, subtotalJ: 8.3333, period: '租金1期' },
+  { months: 3,  formula: '50%/12×3',  calcResult: 12.375,commission: 12.38,fee: 0.1251, subtotalJ: 12.5051,period: '租金1期' },
+  { months: 4,  formula: '50%/12×4',  calcResult: 16.50, commission: 16.49,fee: 0.1666, subtotalJ: 16.6566,period: '租金1期' },
+  { months: 5,  formula: '50%/12×5',  calcResult: 20.625,commission: 20.62,fee: 0.2083, subtotalJ: 20.8283,period: '租金1期' },
+  { months: 6,  formula: '50%/12×6',  calcResult: 24.75, commission: 24.75,fee: 0.25,   subtotalJ: 25.00,  period: '租金1期' },
+  { months: 7,  formula: '50%/12×7',  calcResult: 28.875,commission: 28.87,fee: 0.2916, subtotalJ: 29.1616,period: '租金1期' },
+  { months: 8,  formula: '50%/12×8',  calcResult: 33.00, commission: 33.00,fee: 0.3333, subtotalJ: 33.3333,period: '租金1期' },
+  { months: 9,  formula: '50%/12×9',  calcResult: 37.125,commission: 37.13,fee: 0.3751, subtotalJ: 37.5051,period: '租金1期' },
+  { months: 10, formula: '50%/12×10', calcResult: 41.25, commission: 41.24,fee: 0.4166, subtotalJ: 41.6566,period: '租金1期' },
+  { months: 11, formula: '50%/12×11', calcResult: 45.375,commission: 45.37,fee: 0.4583, subtotalJ: 45.8283,period: '租金1期' },
+  { months: 12, formula: '50%/12×12', calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期' },
+  { months: 13, formula: '50%×99%',   calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期', highlight: true },
+  { months: 14, formula: '50%×99%',   calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期' },
+  { months: 12, formula: '0', calcResult: 0.00, commission: 0.00, fee: 0.00, subtotalJ: 0.00, period: '租金2期~结束', special: '12+' },
+  { months: 12, formula: '0', calcResult: 0.00, commission: 0.00, fee: 0.00, subtotalJ: 0.00, period: '租金2期~结束', special: '12+', highlight: true }
+];
+
+// 管家和平台费用（固定）
+const managerService = 1.98;
+const managerFee = 0.02;
+const managerSubtotal = 2.00;
+const platformFee = 3.00;
+
+// 获取DOM元素
+const landlordSlider = document.getElementById('landlordRatio');
+const landlordInput = document.getElementById('landlordInput');
+const landlordDisplay = document.getElementById('landlordDisplay');
+const investorDisplay = document.getElementById('investorDisplay');
+const tableBody = document.getElementById('ratioTableBody');
+
+// 更新表格
+function updateTable() {
+  const landlordRatio = parseInt(landlordSlider.value) / 100;
+  const investorRatio = 1 - landlordRatio;
+  
+  // 更新显示
+  landlordDisplay.textContent = Math.round(landlordRatio * 100) + '%';
+  investorDisplay.textContent = Math.round(investorRatio * 100) + '%';
+  
+  // 清空表格
+  tableBody.innerHTML = '';
+  
+  // 生成表格行
+  rentData.forEach((data, index) => {
+    const row = document.createElement('tr');
+    if (data.highlight) row.className = 'highlight-row';
+    
+    // 计算剩余金额
+    const remaining = 100 - data.subtotalJ - managerSubtotal - platformFee;
+    
+    // 房东和投资人的分账金额
+    const landlordAmount = remaining * landlordRatio;
+    const investorAmount = remaining * investorRatio;
+    
+    // 合计
+    const total = data.subtotalJ + managerSubtotal + platformFee + landlordAmount + investorAmount;
+    
+    const landlordRatioPercent = Math.round(landlordRatio * 100);
+    const investorRatioPercent = Math.round(investorRatio * 100);
+    
+    row.innerHTML = `
+      <td>${data.special || data.months + '个月'}</td>
+      <td>${data.period}</td>
+      <td>${data.formula}</td>
+      <td>${data.calcResult.toFixed(2)}%</td>
+      <td>${data.commission.toFixed(2)}%</td>
+      <td>${data.fee.toFixed(2)}%</td>
+      <td>${data.subtotalJ.toFixed(2)}%</td>
+      <td>${managerService.toFixed(2)}%</td>
+      <td>${managerFee.toFixed(2)}%</td>
+      <td>${managerSubtotal.toFixed(2)}%</td>
+      <td>${platformFee.toFixed(2)}%</td>
+      <td>${landlordRatioPercent}%</td>
+      <td>(100%-J-M-P) × ${landlordRatioPercent}%</td>
+      <td>${landlordAmount.toFixed(2)}%</td>
+      <td>${investorRatioPercent}%</td>
+      <td>(100%-J-M-P) × ${investorRatioPercent}%</td>
+      <td>${investorAmount.toFixed(2)}%</td>
+      <td>${total.toFixed(2)}%</td>
+    `;
+    
+    tableBody.appendChild(row);
+  });
+}
+
+// 事件监听
+landlordSlider.addEventListener('input', function() {
+  landlordInput.value = this.value;
+  updateTable();
+});
+
+landlordInput.addEventListener('input', function() {
+  let value = parseInt(this.value);
+  if (isNaN(value)) value = 50;
+  if (value < 0) value = 0;
+  if (value > 100) value = 100;
+  this.value = value;
+  landlordSlider.value = value;
+  updateTable();
+});
+
+// 初始化
+updateTable();
+</script>
+</body>
+</html>
