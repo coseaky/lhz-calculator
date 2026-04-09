@@ -425,7 +425,7 @@ tbody tr:last-child td:last-child { border-radius: 0 0 8px 0; }
           </tbody>
         </table>
       </div>
-      <div class="formula" style="margin-top: 16px;">
+      <div class="formula" style="margin-top: 16px; border-top: 2px solid #2563eb; padding-top: 16px;">
         <strong>计算公式：</strong><br>
         • <strong>推荐人佣金</strong> = 50% ÷ 12 × 租期月数（13个月及以上固定50%）<br>
         • <strong>推荐人手续费</strong> = 1%（固定，由推荐人承担，平台扣取）<br>
@@ -717,10 +717,8 @@ const rentData = [
   { months: 10, formula: '50%/12×10', calcResult: 41.25, commission: 41.24,fee: 0.4166, subtotalJ: 41.6566,period: '租金1期' },
   { months: 11, formula: '50%/12×11', calcResult: 45.375,commission: 45.37,fee: 0.4583, subtotalJ: 45.8283,period: '租金1期' },
   { months: 12, formula: '50%/12×12', calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期' },
-  { months: 13, formula: '50%×99%',   calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期', highlight: true },
-  { months: 14, formula: '50%×99%',   calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期' },
-  { months: 12, formula: '0', calcResult: 0.00, commission: 0.00, fee: 0.00, subtotalJ: 0.00, period: '租金2期~结束', special: '12+' },
-  { months: 12, formula: '0', calcResult: 0.00, commission: 0.00, fee: 0.00, subtotalJ: 0.00, period: '租金2期~结束', special: '12+', highlight: true }
+  { months: 13, formula: '50%×99%',   calcResult: 49.50, commission: 49.50,fee: 0.50,   subtotalJ: 50.00,  period: '租金1期', label: '12+个月' },
+  { months: 12, formula: '0', calcResult: 0.00, commission: 0.00, fee: 0.00, subtotalJ: 0.00, period: '租金2期~结束', special: '12+个月<br>（无推荐人）' }
 ];
 
 // 管家和平台费用（固定）
@@ -767,7 +765,7 @@ function updateTable() {
     const investorRatioPercent = Math.round(investorRatio * 100);
     
     row.innerHTML = `
-      <td>${data.special || data.months + '个月'}</td>
+      <td>${data.label || data.special || data.months + '个月'}</td>
       <td>${data.period}</td>
       <td>${data.formula}</td>
       <td>${data.calcResult.toFixed(2)}%</td>
